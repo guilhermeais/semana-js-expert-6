@@ -2,4 +2,6 @@ import {
   createServer
 } from 'http'
 
-export default createServer()
+import {handler} from './routes.js'
+
+export default createServer(handler)

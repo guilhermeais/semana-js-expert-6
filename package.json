@@ -5,6 +5,8 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
+    "start": "node server/index.js",
+    "live-reload": "nodemon server/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "engines": {
@@ -20,5 +22,12 @@
   "bugs": {
     "url": "https://github.com/guilhermeais/semana-js-expert-6/issues"
   },
-  "homepage": "https://github.com/guilhermeais/semana-js-expert-6#readme"
+  "homepage": "https://github.com/guilhermeais/semana-js-expert-6#readme",
+  "devDependencies": {
+    "nodemon": "^2.0.15"
+  },
+  "dependencies": {
+    "pino": "^7.8.0",
+    "pino-pretty": "^7.5.3"
+  }
 }
