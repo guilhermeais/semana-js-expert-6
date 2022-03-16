@@ -19,7 +19,7 @@ async function routes(request, response){
 
   if(method == 'GET' && url == '/home'){
     const {
-      stream
+      stream,
     } = await controller.getFileStream(homeHTML)
 
     return stream.pipe(response)
@@ -32,6 +32,18 @@ async function routes(request, response){
 
     return stream.pipe(response)
   }
+
+  if(method === 'GET'){
+    const { stream, type } = await controller.getFileStream(url)
+    return stream.pipe(response)
+  }
+
+  response.writeHead(404)
+  return response.end()
+}
+
+function handleError(response, error){
+  //https://youtu.be/_yolPPGtySM?t=3984
 }
 
 export function handler(request, response){
