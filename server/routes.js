@@ -25,7 +25,7 @@ async function routes(request, response){
     return stream.pipe(response)
   }
 
-  if(method == 'GET' && url == '/controller'){ // https://youtu.be/_yolPPGtySM?t=3572
+  if(method == 'GET' && url == '/controller'){
     const {
       stream
     } = await controller.getFileStream(controllerHTML)
