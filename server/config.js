@@ -27,6 +27,9 @@ export default {
       '.html': 'text/html',
       '.js': 'text/javascript',
       '.css': 'text/css',
+      '.png': 'image/png',
+      'json': 'application/json',
+      'jpg': 'image/jpeg',
     }
   }
 }
