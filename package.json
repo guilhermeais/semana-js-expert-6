@@ -7,7 +7,9 @@
   "scripts": {
     "start": "node server/index.js",
     "live-reload": "nodemon server/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest --no-cache",
+    "test:watch": "npm run test -- --watchAll",
+    "test:coverage":"npm run test -- --coverage tests/unit"
   },
   "engines": {
     "node": "17"
