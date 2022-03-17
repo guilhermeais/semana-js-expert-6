@@ -36,7 +36,6 @@ async function routes(request, response){
 
   if(method === 'GET'){
     const { stream, type } = await controller.getFileStream(url)
-    console.log('type', type)
     const contentType = CONTENT_TYPE[type]
 
     if(contentType){
