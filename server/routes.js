@@ -4,6 +4,7 @@ import { logger } from './util.js';
 const controller = new Controller()
 const homeHTML = config.pages.homeHTML
 const controllerHTML = config.pages.controllerHTML
+const CONTENT_TYPE = config.constants.CONTENT_TYPE
 
 
 async function routes(request, response){
@@ -35,6 +36,15 @@ async function routes(request, response){
 
   if(method === 'GET'){
     const { stream, type } = await controller.getFileStream(url)
+    console.log('type', type)
+    const contentType = CONTENT_TYPE[type]
+
+    if(contentType){
+      response.writeHead(200, {
+        'Content-Type': contentType
+      })
+    }
+    
     return stream.pipe(response)
   }
 
