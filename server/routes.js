@@ -42,11 +42,17 @@ async function routes(request, response){
   return response.end()
 }
 
-function handleError(response, error){
-  //https://youtu.be/_yolPPGtySM?t=3984
+function handleError(error, response){
+  if(error.message.includes('ENOENT')){
+   logger.warn(`asset not found: ${error.stack}`)
+   response.writeHead(404)
+    return response.end()
+  }
+
+  logger.error(`caugth error on API: ${error.stack}`)
 }
 
 export function handler(request, response){
   return routes(request, response)
-  .catch(error => logger.error(error.stack))
+  .catch(error => handleError(error, response))
 }
