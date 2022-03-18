@@ -4,7 +4,7 @@ import { join, extname } from 'path'
 import config from './config.js'
 
 const publicDirectory = config.dir.publicDirectory
-export class Service {
+export default class Service {
   createFileStream(filename){
     return fs.createReadStream(filename)
   }

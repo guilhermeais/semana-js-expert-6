@@ -1,5 +1,5 @@
 import config from './config.js';
-import { Controller } from './controller.js';
+import Controller  from './controller.js';
 import { logger } from './util.js';
 const controller = new Controller()
 const homeHTML = config.pages.homeHTML

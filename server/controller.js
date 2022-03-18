@@ -1,6 +1,6 @@
-import { Service } from './service.js';
+import Service  from './service.js';
 
-export class Controller {
+export default class Controller {
   constructor() {
     this.service = new Service()
   }
