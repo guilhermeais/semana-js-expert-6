@@ -6,7 +6,7 @@ import { Service, } from '../../../server/service';
 import { Controller } from '../../../server/controller'
 import TestUtil from '../_util/testUtil';
 
-describe('Controller - test controller', () => {
+describe('#Controller - test suite for controller return', () => {
   beforeEach(() => {
     jest.restoreAllMocks()
     jest.clearAllMocks()
@@ -21,13 +21,13 @@ describe('Controller - test controller', () => {
       }
       const mockFileStream = TestUtil.generateReadableStream(['data'])
 
-      jest.spyOn(Service.prototype, 'getFileInfo').mockReturnValue(mockFileInfo)
-      jest.spyOn(Service.prototype, 'createFileStream').mockReturnValue(mockFileStream)
+      const getFileInfoSpy = jest.spyOn(Service.prototype, Service.prototype.getFileInfo.name).mockReturnValue(mockFileInfo)
+      const createFileStreamSpy = jest.spyOn(Service.prototype, Service.prototype.createFileStream.name).mockReturnValue(mockFileStream)
 
       const result = await controller.getFileStream(mockFileInfo.name)
 
-      expect(Service.prototype.getFileInfo).toHaveBeenCalledWith(mockFileInfo.name)
-      expect(Service.prototype.createFileStream).toHaveBeenCalledWith(mockFileInfo.name)
+      expect(getFileInfoSpy).toHaveBeenCalledWith(mockFileInfo.name)
+      expect(createFileStreamSpy).toHaveBeenCalledWith(mockFileInfo.name)
       expect(result).toEqual({
         stream: mockFileStream,
         type: mockFileInfo.type
