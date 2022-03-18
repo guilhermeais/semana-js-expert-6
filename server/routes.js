@@ -57,8 +57,10 @@ function handleError(error, response){
    response.writeHead(404)
     return response.end()
   }
-
+  
   logger.error(`caugth error on API: ${error.stack}`)
+  response.writeHead(500)
+  return response.end()
 }
 
 export function handler(request, response){
