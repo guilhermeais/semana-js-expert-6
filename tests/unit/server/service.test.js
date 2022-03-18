@@ -2,7 +2,7 @@ import { jest, expect, describe, test, beforeEach } from '@jest/globals'
 import config from '../../../server/config';
 import fsPromises from 'fs/promises';
 import fs from 'fs'
-import { Service } from '../../../server/service';
+import Service from '../../../server/service';
 import TestUtil from '../_util/testUtil';
 import { extname, join } from 'path';
 const { pages, location, dir: {publicDirectory} } = config

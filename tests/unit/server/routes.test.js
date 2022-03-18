@@ -1,6 +1,6 @@
 import { jest, expect, describe, test, beforeEach } from '@jest/globals'
 import config from '../../../server/config';
-import { Controller } from '../../../server/controller';
+import Controller from '../../../server/controller';
 import { handler } from '../../../server/routes';
 import TestUtil from '../_util/testUtil';
 const { pages, location } = config
