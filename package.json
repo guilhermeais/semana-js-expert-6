@@ -11,13 +11,10 @@
     "test:watch": "npm run test -- --watchAll",
     "test:coverage": "npm run test -- --coverage tests/unit",
     "test:e2e": "npm run test --  tests/e2e",
-
-
     "live-reload:docker": "sudo docker-compose up --build live-reload",
     "test:docker": "sudo docker-compose up --build test",
     "test:watch:docker": "sudo docker-compose up --build test-watch",
     "test:coverage:docker": "sudo docker-compose up --build test-coverage"
-    
   },
   "engines": {
     "node": "17"
@@ -35,7 +32,9 @@
   "homepage": "https://github.com/guilhermeais/semana-js-expert-6#readme",
   "devDependencies": {
     "jest": "^27.5.1",
-    "nodemon": "^2.0.15"
+    "nodemon": "^2.0.15",
+    "portfinder": "^1.0.28",
+    "supertest": "^6.2.2"
   },
   "dependencies": {
     "pino": "^7.8.0",
