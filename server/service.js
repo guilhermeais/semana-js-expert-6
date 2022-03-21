@@ -22,8 +22,6 @@ export default class Service {
     this.currentBitRate = 0
     this.throttleTranform = {}
     this.currentReadable = {}
-
-    this.startStreaming()
   }
 
   createClientStream(){
@@ -104,6 +102,10 @@ export default class Service {
       this.broadCast()
     )
     
+  }
+
+  stopStreaming(){
+    this.throttleTranform?.end?.()
   }
 
   createFileStream(filename){
