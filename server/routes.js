@@ -82,7 +82,7 @@ function handleError(error, response){
   return response.end()
 }
 
-export function handler(request, response){
+export async function handler(request, response){
   return routes(request, response)
   .catch(error => handleError(error, response))
 }
