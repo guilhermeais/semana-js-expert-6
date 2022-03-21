@@ -5,7 +5,7 @@ const controller = new Controller()
 const homeHTML = config.pages.homeHTML
 const controllerHTML = config.pages.controllerHTML
 const CONTENT_TYPE = config.constants.CONTENT_TYPE
-
+import {once} from 'events'
 
 async function routes(request, response){
   const { method, url } = request
@@ -43,6 +43,14 @@ async function routes(request, response){
     })
 
     return stream.pipe(response)
+  }
+
+  if(method === 'POST' && url === '/controller' ){
+    const data = await once(request, 'data')
+    const item = JSON.parse(data)
+    const result = await controller.handleCommand(item)
+
+    return response.end(JSON.stringify(result))
   }
 
   if(method === 'GET'){
