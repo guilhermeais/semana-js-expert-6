@@ -9,6 +9,14 @@ import { setTimeout } from 'timers/promises';
 const getAvailablePort = portfinder.getPortPromise
 const RETENTION_DATA_PERIOD = 200
 describe('API E2E Suite Test', () => {
+  const commandResponse = JSON.stringify({
+    message: 'ok'
+  })
+
+  const possibleCommands = {
+    start: 'start',
+    stop: 'stop'
+  }
   function pipeAndReadStreamdata(stream, onChunk){
     const transform = new Transform(
       {
@@ -42,6 +50,19 @@ describe('API E2E Suite Test', () => {
       })
     }
 
+     function commandSender(testServer) {
+      return {
+        async send(command) {
+          const response = await testServer.post('/controller')
+          .send({
+            command
+          })
+
+          expect(response.text).toStrictEqual(commandResponse)
+        }
+      }
+    }
+
     test('it should not receive data stream if the process is not playing', async () => {
       const server = await getTestServer()
       const onChunk = jest.fn()
@@ -54,7 +75,25 @@ describe('API E2E Suite Test', () => {
       server.kill()
       expect(onChunk).toHaveBeenCalledTimes(0)
     })
-    test.todo('it should receive data stream if the process is playing')
+    test('it should receive data stream if the process is playing', async () => {
+      const server = await getTestServer()
+
+      const onChunk = jest.fn()
+      const { send } =  commandSender(server.testServer)
+      pipeAndReadStreamdata(
+        server.testServer.get('/stream'),
+        onChunk
+      )
+
+      await send(possibleCommands.start)
+      await setTimeout(RETENTION_DATA_PERIOD)
+      await send(possibleCommands.stop)
+      
+      const [ [ buffer ] ] = onChunk.mock.calls
+      expect(buffer).toBeInstanceOf(Buffer)
+      expect(buffer.length).toBeGreaterThan(1000)
+      server.kill()
+    })
     
   })
 });
