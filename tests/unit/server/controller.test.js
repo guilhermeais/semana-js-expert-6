@@ -2,23 +2,35 @@ import { jest, expect, describe, test, beforeEach } from '@jest/globals'
 import  Service  from '../../../server/service';
 import Controller from '../../../server/controller'
 import TestUtil from '../_util/testUtil';
+import { PassThrough } from 'stream'
 
+const CLIENT_ID_MOCK = 'randomUUID'
 class SpyService {
   constructor(){
     this.startStreaming = jest.fn()
     this.stopStreaming = jest.fn()
-    this.createClientStream = jest.fn()
+    this.createClientStream = jest.fn().mockReturnValue({
+      clientStream: new PassThrough(),
+      id: CLIENT_ID_MOCK
+    })
     this.removeClientStream = jest.fn()
   }
 }
 
+function makeService(){
+  const service = new SpyService()
+  return {
+    service
+  }
+}
+
 function makeController(){
-  const spyService = new SpyService()
   const controller = new Controller()
-  controller.service = spyService
+  const {service} = makeService()
+  controller.service = service
   return {
     controller,
-    spyService
+    spyService: service
   }
 }
 
@@ -106,6 +118,30 @@ describe('#Controller - test suite for controller return', () => {
        expect(commandString.toLowerCase).toHaveBeenCalled()
  
        expect(result).toBeUndefined()
+    });
+  });
+
+  describe('createClientStream', () => {
+    test('should return an client stream and an onClose function', () => {
+      const { controller, spyService } = makeController()
+      const result = controller.createClientStream()
+
+      expect(spyService.createClientStream).toHaveBeenCalled()
+      expect(result.stream).toBeInstanceOf(PassThrough)
+      expect(result.onClose).toBeInstanceOf(Function)
+    });
+
+    describe('onClose', () => {
+      test('should call service.removeClientStream with correct id', () => {
+        const { controller, spyService } = makeController()
+        const result = controller.createClientStream()
+
+        expect(spyService.createClientStream).toHaveBeenCalled()
+        expect(result.stream).toBeInstanceOf(PassThrough)
+        expect(result.onClose).toBeInstanceOf(Function)
+        result.onClose()
+        expect(spyService.removeClientStream).toHaveBeenCalledWith(CLIENT_ID_MOCK)
+      });
     });
   });
 });
