@@ -1,7 +1,7 @@
 const defaultConfig = {
   coverageDirectory: 'coverage',
-  coverageeProvider: 'v8',
-  covergaeReporters: ['lcov', 'text'],
+  coverageProvider: 'v8',
+  coverageReporters: ['lcov', 'text'],
   coverageThreshold: {
     global: {
       branch: 100,
