@@ -6,7 +6,7 @@ import Service from '../../../server/service';
 import TestUtil from '../_util/testUtil';
 import { extname, join } from 'path';
 import crypto from 'crypto';
-import { PassThrough } from 'stream';
+import { PassThrough, Writable } from 'stream';
 import childProcess from 'child_process'
 const { pages, location, dir: {publicDirectory} } = config
 
@@ -151,7 +151,7 @@ describe('Service - test manipulation of file streams', () => {
     });
   });
   describe('getBitRate', () => {
-    test('shoudl return the bitRate as string', async () =>{
+    test('should return the bitRate as string', async () =>{
       const songName = 'someSong.mp3'
       const service = new Service()
 
@@ -181,4 +181,25 @@ describe('Service - test manipulation of file streams', () => {
       expect(service._executeSoxCommand).toHaveBeenCalledWith(['--i', '-B', songName])
     });
   });
+
+  describe('broadCast', () => {
+    test('should write only for active client streams', () => {
+      const service = new Service()
+      const onData = jest.fn()
+      const client1 = TestUtil.generateWritableStream(onData)
+      const client2 = TestUtil.generateWritableStream(onData)
+      jest.spyOn(service.clientStreams,  service.clientStreams.delete.name)
+
+      service.clientStreams.set('1', client1)
+      service.clientStreams.set('2', client2)
+      client2.end() // client2 desconectado
+      
+      const writable = service.broadCast()
+      // vai mandar somenta para o client1 porquê o outro desconectou
+      writable.write('hello world!')
+      expect(writable).toBeInstanceOf(Writable)
+      expect(service.clientStreams.delete).toHaveBeenCalled()
+      expect(onData).toHaveBeenCalledTimes(1)
+    })
+  })
 });
