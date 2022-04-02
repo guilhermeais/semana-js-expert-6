@@ -8,7 +8,8 @@ import { extname, join } from 'path';
 import crypto from 'crypto';
 import { PassThrough, Writable } from 'stream';
 import childProcess from 'child_process'
-const { pages, location, dir: {publicDirectory} } = config
+import streamsAsync  from 'stream/promises'
+const { pages, location, dir: {publicDirectory}, constants: {fallbackBitRate, bitRateDivisor} } = config
 
 describe('Service - test manipulation of file streams', () => {
   const getSpawnResponse = ({
@@ -166,7 +167,6 @@ describe('Service - test manipulation of file streams', () => {
       expect(service._executeSoxCommand).toHaveBeenCalledWith(['--i', '-B', songName])
     })
     test('should return fallbackBitRate if occur an error', async () => {
-      const fallbackBitRate = config.constants.fallbackBitRate
       const songName = 'someSong.mp3'
       const service = new Service()
 
@@ -202,4 +202,52 @@ describe('Service - test manipulation of file streams', () => {
       expect(onData).toHaveBeenCalledTimes(1)
     })
   })
+
+  describe('startStreaming', () => {
+    test('should call sox command', async () => {
+      const currentSong = 'someSong.mp3'
+      const service = new Service()
+      service.currentSong = currentSong
+      const currentReadable = TestUtil.generateReadableStream(['data'])
+      const expectedResult = {
+        success: 'true'
+      }
+      const writableBroadCaster = TestUtil.generateWritableStream(() => {})
+
+      jest.spyOn(
+        service,
+        service.getBitRate.name
+      ).mockResolvedValue(fallbackBitRate)
+  
+      jest.spyOn(
+        streamsAsync,
+        streamsAsync.pipeline.name
+      ).mockResolvedValue(expectedResult)
+  
+      jest.spyOn(
+        fs,
+        fs.createReadStream.name
+      ).mockReturnValue(currentReadable)
+  
+      jest.spyOn(
+        service,
+        service.broadCast.name
+      ).mockReturnValue(writableBroadCaster)
+
+      const expectedThrottle = fallbackBitRate / bitRateDivisor
+      const result = await service.startStreaming()
+
+      expect(service.currentBitRate).toEqual(expectedThrottle)
+      expect(result).toEqual(expectedResult)
+
+      expect(service.getBitRate).toHaveBeenCalledWith(currentSong)
+      expect(fs.createReadStream).toHaveBeenCalledWith(currentSong)
+      expect(streamsAsync.pipeline).toHaveBeenCalledWith(
+        currentReadable,
+        service.throttleTranform,
+        service.broadCast()
+      )
+
+    });
+  });
 });
