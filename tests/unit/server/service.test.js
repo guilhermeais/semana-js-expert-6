@@ -5,13 +5,27 @@ import fs from 'fs'
 import Service from '../../../server/service';
 import TestUtil from '../_util/testUtil';
 import { extname, join } from 'path';
+import crypto from 'crypto';
+import { PassThrough } from 'stream';
+import childProcess from 'child_process'
 const { pages, location, dir: {publicDirectory} } = config
 
 describe('Service - test manipulation of file streams', () => {
+  const getSpawnResponse = ({
+    stdout = '',
+    stderr = '',
+    stdin = () => {}
+  }) => ({
+    stdout: TestUtil.generateReadableStream([stdout]),
+    stderr: TestUtil.generateReadableStream([stderr]),
+    stdin: TestUtil.generateWritableStream(stdin),
+  })
+
   beforeEach(() => {
     jest.restoreAllMocks()
     jest.clearAllMocks()
   })
+  
 
   describe('getFileInfo', () => {
     test('should return the correct type and name', async ()=> {
@@ -92,6 +106,79 @@ describe('Service - test manipulation of file streams', () => {
 
         expect(()=> service.createFileStream('non-existing.html')).rejects.toThrow('ENOENT')
       })
+    });
+  });
+
+  describe('createClientStream', () => {
+    test('should return a clientStream and an id', () => {
+      const service = new Service()
+      
+      const spyRandomUUID = jest.spyOn(crypto, 'randomUUID').mockReturnValue('test-uuid')
+      const spyCreateClientStream = jest.spyOn(service, 'createClientStream')
+      const result = service.createClientStream()
+
+      expect(spyCreateClientStream).toHaveBeenCalled()
+      expect(spyRandomUUID).toHaveBeenCalled()
+      expect(result.clientStream).toBeInstanceOf(PassThrough)
+      expect(result.id).toBe('test-uuid')
+    })
+  });
+
+  describe('removeCLientStream', () => {
+    test('should remove the clientStream from the service', () => {
+      const service = new Service()
+      const clientStream = new PassThrough()
+      const id = 'test-uuid'
+      service.clientStreams.set(id, clientStream)
+
+      service.removeClientStream(id)
+
+      expect(service.clientStreams[id]).toBeUndefined()
+    })
+  })
+
+  describe('_executeSoxCommand', () => {
+    test('should call childProcess.spawn with correct params', () => {
+      const service = new Service()
+      const spawnResponse = getSpawnResponse({stdout: '1k'})
+      const spySpawn = jest.spyOn(childProcess, 'spawn').mockReturnValue(spawnResponse)
+      const testCommand = ['test-command']
+
+      const result = service._executeSoxCommand(testCommand)
+
+      expect(spySpawn).toHaveBeenCalledWith('sox', testCommand)
+      expect(result).toStrictEqual(spawnResponse)
+    });
+  });
+  describe('getBitRate', () => {
+    test('shoudl return the bitRate as string', async () =>{
+      const songName = 'someSong.mp3'
+      const service = new Service()
+
+      jest.spyOn(service, '_executeSoxCommand').mockReturnValue(
+        getSpawnResponse({stdout: ' 1k '})
+      )
+      
+      const bitRatePromise = service.getBitRate(songName)
+      const result = await bitRatePromise
+
+      expect(result).toStrictEqual('1000')
+      expect(service._executeSoxCommand).toHaveBeenCalledWith(['--i', '-B', songName])
+    })
+    test('should return fallbackBitRate if occur an error', async () => {
+      const fallbackBitRate = config.constants.fallbackBitRate
+      const songName = 'someSong.mp3'
+      const service = new Service()
+
+      jest.spyOn(service, '_executeSoxCommand').mockReturnValue(
+        getSpawnResponse({stderr: 'Error!'})
+      )
+      
+      const bitRatePromise = service.getBitRate(songName)
+      const result = await bitRatePromise
+
+      expect(result).toStrictEqual(fallbackBitRate)
+      expect(service._executeSoxCommand).toHaveBeenCalledWith(['--i', '-B', songName])
     });
   });
 });
