@@ -76,10 +76,10 @@ export default class Service {
   }
 
   broadCast(){
-    return Writable({
+    return new Writable({
       write: (chunk, encoding, cb) => {
         for (const [id, stream] of this.clientStreams) {
-          if(stream.writeEnded){ // se o cliente desconectou, não mandaremos mais dados a ele
+          if(stream.writableEnded){ // se o cliente desconectou, não mandaremos mais dados a ele
             this.clientStreams.delete(id)
             continue;
           }
