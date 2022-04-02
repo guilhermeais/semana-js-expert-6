@@ -9,6 +9,7 @@ import crypto from 'crypto';
 import { PassThrough, Writable } from 'stream';
 import childProcess from 'child_process'
 import streamsAsync  from 'stream/promises'
+import Throttle from 'throttle';
 const { pages, location, dir: {publicDirectory}, constants: {fallbackBitRate, bitRateDivisor} } = config
 
 describe('Service - test manipulation of file streams', () => {
@@ -244,10 +245,31 @@ describe('Service - test manipulation of file streams', () => {
       expect(fs.createReadStream).toHaveBeenCalledWith(currentSong)
       expect(streamsAsync.pipeline).toHaveBeenCalledWith(
         currentReadable,
-        service.throttleTranform,
+        service.throttleTransform,
         service.broadCast()
       )
+    });
+  });
 
+  describe('stopStreaming', () => {
+    describe('existing throttleTransform', () => {
+      test('should end throttle', () => {
+        const service = new Service()
+        service.throttleTransform = new Throttle(1)
+    
+        jest.spyOn(
+          service.throttleTransform,
+          "end",
+        ).mockReturnValue()
+    
+        service.stopStreaming()
+        expect(service.throttleTransform.end).toHaveBeenCalled()
+      });
+
+      describe('non existing throttleTransform', () => {
+        const service = new Service()
+        expect(() => service.stopStreaming()).not.toThrow()
+      });
     });
   });
 });
