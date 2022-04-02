@@ -20,7 +20,7 @@ export default class Service {
     this.clientStreams = new Map();
     this.currentSong = englishConversation
     this.currentBitRate = 0
-    this.throttleTranform = {}
+    this.throttleTransform = {}
     this.currentReadable = {}
   }
 
@@ -94,18 +94,18 @@ export default class Service {
   async startStreaming() {
     logger.info(`starting with ${this.currentSong}`)
     const bitRate = this.currentBitRate = (await this.getBitRate(this.currentSong)) / bitRateDivisor
-    const throttleTranform = this.throttleTranform = new Throttle(bitRate)
+    const throttleTransform = this.throttleTransform = new Throttle(bitRate)
     const songReadable = this.currentReadable = this.createFileStream(this.currentSong)
     return streamProises.pipeline(
       songReadable, // a medida que a stream do song chega
-      throttleTranform, // o throttle pega, porem manda somente a quantia setada na constante bitRate (backpressure)
+      throttleTransform, // o throttle pega, porem manda somente a quantia setada na constante bitRate (backpressure)
       this.broadCast()
     )
     
   }
 
   stopStreaming(){
-    this.throttleTranform?.end?.()
+    this.throttleTransform?.end?.()
   }
 
   createFileStream(filename){
