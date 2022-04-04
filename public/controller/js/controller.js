@@ -5,6 +5,12 @@ export default class Controller {
   }
 
   static initialize(dependencies) {
-    return new Controller(dependencies)
+    const controller = new Controller(dependencies)
+    controller.onLoad()
+    return controller
+  }
+
+  onLoad() {
+    this.view.onLoad()
   }
 }
