@@ -25,6 +25,10 @@ export default class Controller {
       this.service.stopStreaming()
       return result
     }
+
+    return {
+      message: 'command not found.'
+    }
   }
 
   createClientStream() {
