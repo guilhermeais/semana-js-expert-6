@@ -5,9 +5,11 @@ import {
   test,
   beforeEach 
 } from '@jest/globals'
+
+import View from '../../../public/controller/js/view.js'
 import { JSDOM } from 'jsdom'
 describe('#View - test suite for presentation layer', () => {
-  const dom = new JSON()
+  const dom = new JSDOM()
   global.document = dom.window.document
   global.window = dom.window
 
@@ -31,19 +33,42 @@ describe('#View - test suite for presentation layer', () => {
   beforeEach(() => {
     jest.resetAllMocks()
     jest.clearAllMocks()
-
-    jest.spyOn(
-      document,
-      document.querySelectorAll.name
-    ).mockReturnValue([makeBtnElement()])
-
-    jest.spyOn(
-      document,
-      document.getElementById.name
-    ).mockReturnValue(makeBtnElement())
   })
 
-  test.todo('#changeCommandButtonsVisibility - given hide = true it should add unassigned class and reset onclick')
-  test.todo('#changeCommandButtonsVisibility - given hide = true it should remove unassigned class and reset onclick')
-  test.todo('#onLoad')
+  test('#changeCommandButtonsVisibility - given hide = true it should add unassigned class and reset onclick', () => {
+    const view = new View()
+    const btn = makeBtnElement()
+    jest.spyOn(
+      document,
+      'querySelectorAll'
+    ).mockReturnValue([btn])
+
+    view.changeCommandButtonsVisibility()
+    expect(btn.classList.add).toHaveBeenCalledWith('unassigned')
+    expect(btn.onclick.name).toStrictEqual('onClickReset')
+
+    expect(() => btn.onclick()).not.toThrow()
+  })
+  test('#changeCommandButtonsVisibility - given hide = true it should remove unassigned class and reset onclick', () => {
+    const view = new View()
+    const btn = makeBtnElement()
+    jest.spyOn(
+      document,
+      'querySelectorAll'
+    ).mockReturnValue([btn])
+
+    view.changeCommandButtonsVisibility(false)
+    expect(btn.classList.add).not.toHaveBeenCalledWith('unassigned')
+    expect(btn.classList.remove).toHaveBeenCalledWith('unassigned')
+
+    expect(btn.onclick.name).toStrictEqual('onClickReset')
+
+    expect(() => btn.onclick()).not.toThrow()
+  })
+  test('#onLoad', () => {
+    const view = new View()
+    jest.spyOn(view, 'changeCommandButtonsVisibility').mockReturnValue()
+    view.onLoad()
+    expect(view.changeCommandButtonsVisibility).toHaveBeenCalled()
+  })
 });
