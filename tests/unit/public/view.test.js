@@ -33,6 +33,12 @@ describe('#View - test suite for presentation layer', () => {
   beforeEach(() => {
     jest.resetAllMocks()
     jest.clearAllMocks()
+
+    
+    jest.spyOn(
+      document,
+      'getElementById'
+    ).mockReturnValue(makeBtnElement())
   })
 
   test('#changeCommandButtonsVisibility - given hide = true it should add unassigned class and reset onclick', () => {
