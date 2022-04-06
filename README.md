@@ -19,15 +19,15 @@ Acesse a [**comunidade exclusiva no discord**](https://bit.ly/semanajsexpert-dis
     - [x] Dado um usuário desconectado, não deve quebrar a API
     - [x] Mesmo que vários comandos sejam disparados ao mesmo tempo, não deve quebrar a API
     - [x] Caso aconteça um erro inesperado, a API deve continuar funcionando
-    - [ ] O projeto precisa ser executado em ambientes Linux, Mac e Windows
+    - [x] O projeto precisa ser executado em ambientes Linux, Mac e Windows
 
 - Web App 
     - Client
         - [x] Deve reproduzir a transmissão
         - [ ] Não deve pausar se algum efeito for adicionado
     - Controller
-        - [ ] Deve atingir 100% de cobertura de código em testes
-        - [ ] Deve poder iniciar ou parar uma transmissão 
+        - [x] Deve atingir 100% de cobertura de código em testes
+        - [x] Deve poder iniciar ou parar uma transmissão 
         - [ ] Deve enviar comandos para adicionar audio efeitos à uma transmissão
 
 ## Tarefas por aula
