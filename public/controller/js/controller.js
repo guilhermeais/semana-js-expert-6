@@ -1,4 +1,9 @@
+import Service from './service.js'
+import View from './view.js'
 export default class Controller {
+  /**
+   * @param {{view: View, service: Service}}
+   */
   constructor({view, service}){
     this.view = view
     this.service = service
@@ -11,7 +16,9 @@ export default class Controller {
   }
 
   async commandReceived(text){
-    console.log('controller', text)
+    return this.service.makeRequest({
+       command: text
+    })
   }
 
   onLoad() {
