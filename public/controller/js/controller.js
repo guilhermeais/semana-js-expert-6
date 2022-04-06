@@ -17,7 +17,7 @@ export default class Controller {
 
   async commandReceived(text){
     return this.service.makeRequest({
-       command: text
+       command: text.toLowerCase()
     })
   }
 
