@@ -8,7 +8,7 @@ import Throttle from 'throttle'
 import childProcess from 'child_process'
 import { logger } from './util.js'
 import { once } from 'events'
-import streamProises from 'stream/promises'
+import streamPromises from 'stream/promises'
 
 const publicDirectory = config.dir.publicDirectory
 const fxDirectory = config.dir.fxDirectory
@@ -102,7 +102,7 @@ export default class Service {
     const bitRate = this.currentBitRate = (await this.getBitRate(this.currentSong)) / bitRateDivisor
     const throttleTransform = this.throttleTransform = new Throttle(bitRate)
     const songReadable = this.currentReadable = this.createFileStream(this.currentSong)
-    return streamProises.pipeline(
+    return streamPromises.pipeline(
       songReadable, // a medida que a stream do song chega
       throttleTransform, // o throttle pega, porem manda somente a quantia setada na constante bitRate (backpressure)
       this.broadCast()
@@ -151,14 +151,24 @@ export default class Service {
 
   appendFxStream(fx) {
     const throttleTransformable = new Throttle(this.currentBitRate)
-    streamProises.pipeline(
+    streamPromises.pipeline(
       throttleTransformable,
       this.broadCast()
     )
 
-    function unpipe() {
+    const unpipe = () => {
+      // Aqui, nós usamos a função de mergear audios
+      // Ela pega o audio atual no this.currentReadable
+      const transformStream = this.mergeAudioStreams(fx, this.currentReadable)
+
+      this.throttleTransform = throttleTransformable
+      this.currentReadable = transformStream
       this.currentReadable.removeListener('unpipe', unpipe)
 
+      streamPromises.pipeline(
+        transformStream,
+        throttleTransformable
+      )
     }
 
     this.throttleTransform.on('unpipe', unpipe)
@@ -192,15 +202,18 @@ export default class Service {
 
     // Plugamos a stream de conversação
     // na entrada de dados do terminal
-    streamProises.pipeline(
+    streamPromises.pipeline(
       readable,
       stdin
     )
+    .catch(error => logger.error(`error on sending stream to sox`, error))
 
-    streamProises.pipeline(
+    streamPromises.pipeline(
       stdout,
       transformStream
     )
+    .catch(error => logger.error(`error on receiving stream from sox`, error))
+
 
     return transformStream
   }
