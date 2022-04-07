@@ -1,7 +1,7 @@
 import crypto from 'crypto'
 import fs from 'fs'
 import fsPromises from 'fs/promises'
-import { join, extname } from 'path'
+import path, { join, extname } from 'path'
 import { PassThrough, Writable } from 'stream'
 import config from './config.js'
 import Throttle from 'throttle'
@@ -11,6 +11,7 @@ import { once } from 'events'
 import streamProises from 'stream/promises'
 
 const publicDirectory = config.dir.publicDirectory
+const fxDirectory = config.dir.fxDirectory
 const fallbackBitRate = config.constants.fallbackBitRate
 const englishConversation = config.constants.englishConversation
 const bitRateDivisor = config.constants.bitRateDivisor
@@ -130,5 +131,16 @@ export default class Service {
       stream: this.createFileStream(name),
       type  
     }
+  }
+
+  async readFxByName(fxName) {
+    const songs = await fsPromises.readdir(fxDirectory)
+    const chosenSong = songs.find(filename => filename.toLowerCase().includes(fxName.toLowerCase()))
+
+    if(!chosenSong) {
+      return Promise.reject(`fx ${fxName} not found`)
+    }
+
+    return path.join(fxDirectory, chosenSong)
   }
 }
