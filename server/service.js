@@ -15,6 +15,10 @@ const fxDirectory = config.dir.fxDirectory
 const fallbackBitRate = config.constants.fallbackBitRate
 const englishConversation = config.constants.englishConversation
 const bitRateDivisor = config.constants.bitRateDivisor
+const audioMediaType = config.constants.audioMediaType
+const songVolume = config.constants.songVolume
+const fxVolume = config.constants.fxVolume
+
 
 export default class Service {
   constructor(){
@@ -81,6 +85,7 @@ export default class Service {
       write: (chunk, encoding, cb) => {
         for (const [id, stream] of this.clientStreams) {
           if(stream.writableEnded){ // se o cliente desconectou, não mandaremos mais dados a ele
+            logger(`client ${id} disconnected, removing from stream`)
             this.clientStreams.delete(id)
             continue;
           }
@@ -142,5 +147,61 @@ export default class Service {
     }
 
     return path.join(fxDirectory, chosenSong)
+  }
+
+  appendFxStream(fx) {
+    const throttleTransformable = new Throttle(this.currentBitRate)
+    streamProises.pipeline(
+      throttleTransformable,
+      this.broadCast()
+    )
+
+    function unpipe() {
+      this.currentReadable.removeListener('unpipe', unpipe)
+
+    }
+
+    this.throttleTransform.on('unpipe', unpipe)
+    this.throttleTransform.pause()
+    this.currentReadable.unpipe(this.throttleTransform)
+  }
+
+  mergeAudioStreams(song, readable) {
+    const transformStream = new PassThrough()
+    const args = [
+      // Arquivo de entrada
+      // -t => tipo do arquivo de entrada
+      '-t', audioMediaType,
+      '-v', songVolume,
+      // -m => merge e o - é pra receber como stream
+      '-m', '-',
+      // Arquivo de que vai ser mergeado
+      '-t', audioMediaType,
+      '-v', fxVolume,
+      // caminho do arquivo que vai ser mergeado
+      song,
+      // Saída
+      '-t', audioMediaType,
+      '-'
+    ]
+
+    const {
+      stdout,
+      stdin
+    } = this._executeSoxCommand(args)
+
+    // Plugamos a stream de conversação
+    // na entrada de dados do terminal
+    streamProises.pipeline(
+      readable,
+      stdin
+    )
+
+    streamProises.pipeline(
+      stdout,
+      transformStream
+    )
+
+    return transformStream
   }
 }
